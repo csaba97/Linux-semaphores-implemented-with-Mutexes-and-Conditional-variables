@@ -15,20 +15,21 @@
 
 
 #define MAX_IN_CRIT_REGION 3
+#define MAX_SEMS 100
 int critical=0;
 int sem_id;
 
-pthread_mutex_t mutex[100];
-pthread_cond_t cond[100];
+pthread_mutex_t mutex[MAX_SEMS+1];
+pthread_cond_t cond[MAX_SEMS+1];
 int nrSem=0;
-int semValues[100];
+int semValues[MAX_SEMS+1];
 
 
 /*IMPORTANT
 initSem() function is not sincronyzed itself so it should not be called in threads etc.
 */
 int initSem(int initValue){
-	if(nrSem>=99){
+	if(nrSem>=MAX_SEMS){
 		printf("Cannot create more semaphores\n");
 		return -1;
 	}

@@ -13,33 +13,38 @@
 #include <sys/mman.h>
 
 #define MAX_IN_CRIT_REGION 4
-int critical,sem_id,nrSem=0,fd[100][2];
+#define MAX_PIPES 100
+#define READ_END 0
+#define WRITE_END 1
+
+
+int critical,sem_id,nrSem=0,fd[MAX_PIPES+1][2];
 
 /*IMPORTANT
 initSem() function is not sincronyzed itself so it should not be called in threads etc.
 */
 int initSem(int initValue){
 	int i;
-	if(nrSem>=99){
+	if(nrSem>=MAX_PIPES){
 		printf("Cannot create more semaphores\n");
 		return -1;
 	}
 	nrSem++;
 	pipe(fd[nrSem]);
 	for(i=1;i<=initValue;i++)
-	write(fd[nrSem][1],"a",1);
+	write(fd[nrSem][WRITE_END],"a",1);
 	return nrSem;
 }
 
 void P(int semId)
 {
 	char c;
-	read(fd[semId][0],&c,1);
+	read(fd[semId][READ_END],&c,1);
 }
 
 void V(int semId)
 {
-	write(fd[semId][1],"a",1);
+	write(fd[semId][WRITE_END],"a",1);
 }
 
 
@@ -73,6 +78,5 @@ int main(int argc, char *argv[])
 	for(i=0;i<10;i++)
 	pthread_join(t[i],NULL);
 
-
-
+	return 0;
 }
